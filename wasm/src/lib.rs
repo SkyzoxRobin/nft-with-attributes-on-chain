@@ -5,8 +5,9 @@
 #![no_std]
 
 elrond_wasm_node::wasm_endpoints! {
-    empty
+    nft_on_chain
     (
+        fillAttributes
     )
 }
 
