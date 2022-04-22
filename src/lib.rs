@@ -12,6 +12,9 @@ mod attribut;
 use attribut::NftAttributes;
 use alloc::string::ToString;
 
+pub type AttributesAsMultiValue<M> = 
+    MultiValue5<u64, ManagedBuffer<M>, ManagedBuffer<M>, ManagedBuffer<M>, Option<ManagedBuffer<M>>>;
+
 #[elrond_wasm::contract]
 pub trait NftOnChain: token::TokenModule  {
     #[init]
@@ -73,7 +76,7 @@ pub trait NftOnChain: token::TokenModule  {
     #[endpoint(fillAttributes)]
     fn fill_attributes_endpoint(
         &self,
-        #[var_args] attributes: MultiValueEncoded<MultiValue5<u64, ManagedBuffer, ManagedBuffer, ManagedBuffer, Option<ManagedBuffer>>>
+        #[var_args] attributes: MultiValueEncoded<AttributesAsMultiValue<Self::Api>>
     ) {
         for attribut in attributes.into_iter() {
             let (number, background, skin, hat, accessories) = attribut.into_tuple();
