@@ -38,7 +38,7 @@ pub trait NftOnChain: token::TokenModule  {
 
         require!(
             !self.attributes(number_to_mint).is_empty(),
-            "On-chain attributes for this number doesn't exit"
+            "On-chain attributes for this number doesn't exist"
         );
         let attributes = self.attributes(number_to_mint).get();
 
