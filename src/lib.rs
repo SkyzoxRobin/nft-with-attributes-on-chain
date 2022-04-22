@@ -33,9 +33,9 @@ pub trait NftOnChain: token::TokenModule  {
         let royalties = BigUint::from(ROYALTIES);
         let name = self.name().get();
 
-        require!
-        (!self.attributes(number_to_mint).is_empty(),
-        "On-chain attributes for this number doesn't exit"
+        require!(
+            !self.attributes(number_to_mint).is_empty(),
+            "On-chain attributes for this number doesn't exit"
         );
         let attributes = self.attributes(number_to_mint).get();
 
