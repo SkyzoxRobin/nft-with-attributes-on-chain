@@ -73,19 +73,18 @@ pub trait NftOnChain: token::TokenModule  {
     #[endpoint(fillAttributes)]
     fn fill_attributes_endpoint(
         &self,
-        number: u64,
-        background: ManagedBuffer,
-        skin: ManagedBuffer,
-        hat: ManagedBuffer,
-        accessories: Option<ManagedBuffer>
+        #[var_args] attributes: MultiValueEncoded<MultiValue5<u64, ManagedBuffer, ManagedBuffer, ManagedBuffer, Option<ManagedBuffer>>>
     ) {
-        let attributes = NftAttributes {
-            background: background,
-            skin: skin,
-            hat: hat,
-            accessories: accessories
-        };
-        self.attributes(number).set(&attributes);
+        for attribut in attributes.into_iter() {
+            let (number, background, skin, hat, accessories) = attribut.into_tuple();
+            let attributes = NftAttributes {
+                background: background,
+                skin: skin,
+                hat: hat,
+                accessories: accessories
+            };
+            self.attributes(number).set(&attributes);
+        }
     }
 
     #[storage_mapper("attributes")]
