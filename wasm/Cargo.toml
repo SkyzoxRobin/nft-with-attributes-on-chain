@@ -1,5 +1,5 @@
 [package]
-name = "nft-on-chain-wasm"
+name = "nft-with-on-chain-attributs-wasm"
 version = "0.0.0"
 edition = "2018"
 publish = false
@@ -20,7 +20,7 @@ lto = true
 debug = false
 panic = "abort"
 
-[dependencies.nft-on-chain]
+[dependencies.nft-with-on-chain-attributs]
 path = ".."
 
 [dependencies.elrond-wasm-node]

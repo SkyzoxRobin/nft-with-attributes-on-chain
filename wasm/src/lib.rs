@@ -5,12 +5,14 @@
 #![no_std]
 
 elrond_wasm_node::wasm_endpoints! {
-    nft_on_chain
+    nft_with_on_chain_attributs
     (
         callBack
         changeCollectionOwner
         createNft
+        createNftEnum
         fillAttributes
+        fillAttributesEnum
         issueToken
         nftTokenID
         setLocalRoles

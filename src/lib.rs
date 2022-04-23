@@ -19,7 +19,7 @@ pub type AttributesAsMultiValueEnum =
     MultiValue5<u64, Background, Skin, Hat, Option<Accessory>>;
 
 #[elrond_wasm::contract]
-pub trait NftOnChain: token::TokenModule {
+pub trait NftWithOnChainAttributs: token::TokenModule {
     #[init]
     fn init(&self, name: ManagedBuffer, image_cid: ManagedBuffer, metadata_cid: ManagedBuffer) {
         self.name().set(&name);
@@ -63,7 +63,7 @@ pub trait NftOnChain: token::TokenModule {
         let name = self.name().get();
 
         require!(
-            !self.attributes(number_to_mint).is_empty(),
+            !self.attributes_enum(number_to_mint).is_empty(),
             "On-chain attributes for this number doesn't exist"
         );
         let attributes = self.attributes_enum(number_to_mint).get();

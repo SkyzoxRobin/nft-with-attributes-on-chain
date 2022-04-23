@@ -1,5 +1,5 @@
 [package]
-name = "nft-on-chain-meta"
+name = "nft-with-on-chain-attributs-meta"
 version = "0.0.0"
 edition = "2018"
 publish = false
@@ -7,7 +7,7 @@ authors = [ "Skyzox"]
 
 [dev-dependencies]
 
-[dependencies.nft-on-chain]
+[dependencies.nft-with-on-chain-attributs]
 path = ".."
 
 [dependencies.elrond-wasm-debug]
