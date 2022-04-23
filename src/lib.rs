@@ -12,7 +12,11 @@ mod token;
 use alloc::string::ToString;
 use attribut::*;
 
-pub type AttributesAsMultiValue = MultiValue5<u64, Background, Skin, Hat, Option<Accessory>>;
+pub type AttributesAsMultiValue<M> = 
+    MultiValue5<u64, ManagedBuffer<M>, ManagedBuffer<M>, ManagedBuffer<M>, Option<ManagedBuffer<M>>>;
+
+pub type AttributesAsMultiValueEnum = 
+    MultiValue5<u64, Background, Skin, Hat, Option<Accessory>>;
 
 #[elrond_wasm::contract]
 pub trait NftOnChain: token::TokenModule {
@@ -40,7 +44,35 @@ pub trait NftOnChain: token::TokenModule {
         let mut uris = ManagedVec::new();
         uris.push(uri);
 
-        self.send().esdt_nft_create::<NftAttributes>(
+        self.send().esdt_nft_create::<NftAttributes<Self::Api>>(
+            &token,
+            &BigUint::from(1u64),
+            &name,
+            &royalties,
+            &ManagedBuffer::new(),
+            &attributes,
+            &uris,
+        );
+    }
+
+    #[only_owner]
+    #[endpoint(createNftEnum)]
+    fn create_nft_enum_attributs(&self, number_to_mint: u64) {
+        let token = self.nft_token_id().get();
+        let royalties = BigUint::from(ROYALTIES);
+        let name = self.name().get();
+
+        require!(
+            !self.attributes(number_to_mint).is_empty(),
+            "On-chain attributes for this number doesn't exist"
+        );
+        let attributes = self.attributes_enum(number_to_mint).get();
+
+        let uri = self.build_uri(number_to_mint);
+        let mut uris = ManagedVec::new();
+        uris.push(uri);
+
+        self.send().esdt_nft_create::<NftAttributesEnum>(
             &token,
             &BigUint::from(1u64),
             &name,
@@ -70,7 +102,7 @@ pub trait NftOnChain: token::TokenModule {
     #[endpoint(fillAttributes)]
     fn fill_attributes_endpoint(
         &self,
-        #[var_args] attributes: MultiValueEncoded<AttributesAsMultiValue>,
+        #[var_args] attributes: MultiValueEncoded<AttributesAsMultiValue<Self::Api>>,
     ) {
         for attribut in attributes.into_iter() {
             let (number, background, skin, hat, accessories) = attribut.into_tuple();
@@ -84,8 +116,29 @@ pub trait NftOnChain: token::TokenModule {
         }
     }
 
+    #[only_owner]
+    #[endpoint(fillAttributesEnum)]
+    fn fill_attributes_endpoint_enum(
+        &self,
+        #[var_args] attributes: MultiValueEncoded<AttributesAsMultiValueEnum>,
+    ) {
+        for attribut in attributes.into_iter() {
+            let (number, background, skin, hat, accessories) = attribut.into_tuple();
+            let attributes = NftAttributesEnum {
+                background: background,
+                skin: skin,
+                hat: hat,
+                accessories: accessories,
+            };
+            self.attributes_enum(number).set(&attributes);
+        }
+    }
+
     #[storage_mapper("attributes")]
-    fn attributes(&self, number: u64) -> SingleValueMapper<NftAttributes>;
+    fn attributes(&self, number: u64) -> SingleValueMapper<NftAttributes<Self::Api>>;
+
+    #[storage_mapper("attributes")]
+    fn attributes_enum(&self, number: u64) -> SingleValueMapper<NftAttributesEnum>;
 
     #[storage_mapper("name")]
     fn name(&self) -> SingleValueMapper<ManagedBuffer>;
