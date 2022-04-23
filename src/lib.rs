@@ -7,23 +7,17 @@ elrond_wasm::derive_imports!();
 const IPFS_GATEWAY: &[u8] = "https://ipfs.io/ipfs/".as_bytes();
 const ROYALTIES: u64 = 500;
 
-mod token;
 mod attribut;
-use attribut::NftAttributes;
+mod token;
 use alloc::string::ToString;
+use attribut::*;
 
-pub type AttributesAsMultiValue<M> = 
-    MultiValue5<u64, ManagedBuffer<M>, ManagedBuffer<M>, ManagedBuffer<M>, Option<ManagedBuffer<M>>>;
+pub type AttributesAsMultiValue = MultiValue5<u64, Background, Skin, Hat, Option<Accessory>>;
 
 #[elrond_wasm::contract]
-pub trait NftOnChain: token::TokenModule  {
+pub trait NftOnChain: token::TokenModule {
     #[init]
-    fn init(
-        &self,
-        name: ManagedBuffer,
-        image_cid: ManagedBuffer,
-        metadata_cid: ManagedBuffer
-    ) {
+    fn init(&self, name: ManagedBuffer, image_cid: ManagedBuffer, metadata_cid: ManagedBuffer) {
         self.name().set(&name);
         self.image_cid().set(&image_cid);
         self.metadata_cid().set(&metadata_cid);
@@ -46,14 +40,14 @@ pub trait NftOnChain: token::TokenModule  {
         let mut uris = ManagedVec::new();
         uris.push(uri);
 
-        self.send().esdt_nft_create::<NftAttributes<Self::Api>>(
+        self.send().esdt_nft_create::<NftAttributes>(
             &token,
             &BigUint::from(1u64),
-            &name, 
+            &name,
             &royalties,
             &ManagedBuffer::new(),
             &attributes,
-            &uris
+            &uris,
         );
     }
 
@@ -76,7 +70,7 @@ pub trait NftOnChain: token::TokenModule  {
     #[endpoint(fillAttributes)]
     fn fill_attributes_endpoint(
         &self,
-        #[var_args] attributes: MultiValueEncoded<AttributesAsMultiValue<Self::Api>>
+        #[var_args] attributes: MultiValueEncoded<AttributesAsMultiValue>,
     ) {
         for attribut in attributes.into_iter() {
             let (number, background, skin, hat, accessories) = attribut.into_tuple();
@@ -84,14 +78,14 @@ pub trait NftOnChain: token::TokenModule  {
                 background: background,
                 skin: skin,
                 hat: hat,
-                accessories: accessories
+                accessories: accessories,
             };
             self.attributes(number).set(&attributes);
         }
     }
 
     #[storage_mapper("attributes")]
-    fn attributes(&self, number: u64) -> SingleValueMapper<NftAttributes<Self::Api>>;
+    fn attributes(&self, number: u64) -> SingleValueMapper<NftAttributes>;
 
     #[storage_mapper("name")]
     fn name(&self) -> SingleValueMapper<ManagedBuffer>;
